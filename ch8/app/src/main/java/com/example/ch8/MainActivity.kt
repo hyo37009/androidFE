@@ -14,6 +14,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.ch8.databinding.ActivityMainBinding
+import android.content.Intent
+import android.view.Menu
+import android.view.MenuItem
 
 class MainActivity : AppCompatActivity() {
     private val imageLoadLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()){uriList ->
@@ -26,10 +29,45 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.toolbar.apply {
+            title = "사진 가져오기"
+            setSupportActionBar(this)
+        }
+
         binding.loadImageButton.setOnClickListener {
             checkPermission()
         }
+        binding.navigateFrameActivityButton.setOnClickListener {
+            navigateToFrameActivity()
+        }
+
         initRecyclerView()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.action_add -> {
+                checkPermission()
+                true
+            }
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
+        }
+
+    }
+
+    private fun navigateToFrameActivity(){
+        val images = imageAdapter.currentList.filterIsInstance<ImageItems.Image>().map { it.uri.toString() }.toTypedArray()
+        val intent = Intent(this, FrameActivity::class.java)
+            .putExtra("images", images)
+        startActivity(intent)
+
     }
 
     private fun initRecyclerView(){
